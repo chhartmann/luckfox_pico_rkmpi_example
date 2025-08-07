@@ -1,5 +1,11 @@
 #!/bin/bash
 
+if [ -d ~/gcc ]; then
+    echo "Toolchain already exists."
+else
+	git clone https://github.com/deerpi/arm-rockchip830-linux-uclibcgnueabihf.git ~/gcc
+fi
+
 ROOT_PWD=$(cd "$(dirname $0)" && cd -P "$(dirname "$SOURCE")" && pwd)
 
 if [ "$1" = "clean" ]; then
@@ -16,23 +22,6 @@ if [ "$1" = "clean" ]; then
 	exit
 fi
 
-libc_options=("uclibc"
-	"glibc")
-
-PS3="Enter your choice [1-${#libc_options[@]}]: "
-
-select opt in "${libc_options[@]}"; do
-	if [[ -n "$opt" ]]; then
-		echo "You selected: $opt"
-		echo "你选择了: $opt"
-
-		libc_type="$opt"
-		break
-	else
-		echo "Invalid selection, please try again."
-		echo "无效的选择，请重新选择。"
-	fi
-done
 
 options=("luckfox_pico_rtsp_opencv"
 	"luckfox_pico_rtsp_opencv_capture"
@@ -54,7 +43,7 @@ select opt in "${options[@]}"; do
 			fi
 			mkdir ${ROOT_PWD}/build
 			cd ${ROOT_PWD}/build
-			cmake .. -DEXAMPLE_DIR="$src_dir" -DEXAMPLE_NAME="$opt" -DLIBC_TYPE="$libc_type"
+			cmake .. -DEXAMPLE_DIR="$src_dir" -DEXAMPLE_NAME="$opt"
 			make install
 		else
 			echo "错误：目录 $src_dir 不存在！"
