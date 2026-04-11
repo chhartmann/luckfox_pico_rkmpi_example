@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>YOLOv5 Object Detection Configuration</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .content {
+            padding: 30px;
+        }
+        
+        .section {
+            margin-bottom: 30px;
+            padding: 25px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.5em;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            font-weight: 600;
+        }
+        
+        .form-group input[type="range"] {
+            width: 100%;
+            height: 8px;
+            border-radius: 4px;
+            background: #ddd;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .form-group input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #3498db;
+            cursor: pointer;
+        }
+        
+        .value-display {
+            text-align: center;
+            font-size: 1.8em;
+            color: #3498db;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .classes-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 10px;
+            max-height: 400px;
+            overflow-y: auto;
+            padding: 10px;
+            background: white;
+            border-radius: 8px;
+        }
+        
+        .class-item {
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            background: #ecf0f1;
+            border-radius: 6px;
+            transition: all 0.3s ease;
+        }
+        
+        .class-item:hover {
+            background: #d5dbdb;
+            transform: translateY(-2px);
+        }
+        
+        .class-item input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+        
+        .class-item label {
+            cursor: pointer;
+            flex: 1;
+            margin: 0;
+            font-weight: normal;
+        }
+        
+        .roi-controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 15px;
+        }
+        
+        .roi-controls .form-group {
+            margin-bottom: 0;
+        }
+        
+        .roi-controls input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            font-size: 1em;
+        }
+        
+        .roi-controls input[type="number"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.4);
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, #2ecc71 0%, #27ae60 100%);
+            color: white;
+        }
+        
+        .btn-success:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(46, 204, 113, 0.4);
+        }
+        
+        .status-message {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .status-message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            display: block;
+        }
+        
+        .status-message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+            display: block;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #3498db;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+        
+        .select-all-controls {
+            margin-bottom: 15px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .last-updated {
+            text-align: center;
+            color: #7f8c8d;
+            font-size: 0.9em;
+            margin-top: 20px;
+        }
+        
+        @media (max-width: 768px) {
+            .header h1 {
+                font-size: 1.8em;
+            }
+            
+            .classes-grid {
+                grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎯 YOLOv5 Configuration</h1>
+            <p>Object Detection Settings for Luckfox Pico</p>
+        </div>
+        
+        <div class="content">
+            <div id="statusMessage" class="status-message"></div>
+            
+            <!-- Threshold Settings -->
+            <div class="section">
+                <h2>📊 Detection Thresholds</h2>
+                
+                <div class="form-group">
+                    <label for="confidenceThreshold">Confidence Threshold</label>
+                    <input type="range" id="confidenceThreshold" min="0.01" max="0.99" step="0.01" 
+                           value="{{ config.confidence_threshold }}">
+                    <div class="value-display">
+                        <span id="confidenceValue">{{ config.confidence_threshold }}</span>
+                    </div>
+                    <p style="text-align: center; color: #7f8c8d; margin-top: 5px;">
+                        Minimum confidence score for detected objects
+                    </p>
+                </div>
+                
+                <div class="form-group">
+                    <label for="nmsThreshold">NMS (Non-Maximum Suppression) Threshold</label>
+                    <input type="range" id="nmsThreshold" min="0.01" max="0.99" step="0.01" 
+                           value="{{ config.nms_threshold }}">
+                    <div class="value-display">
+                        <span id="nmsValue">{{ config.nms_threshold }}</span>
+                    </div>
+                    <p style="text-align: center; color: #7f8c8d; margin-top: 5px;">
+                        Overlap threshold for filtering duplicate detections
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Class Selection -->
+            <div class="section">
+                <h2>🏷️ Object Classes</h2>
+                <p style="margin-bottom: 15px; color: #7f8c8d;">
+                    Select which object classes to detect ({{ config.enabled_classes|length }} of {{ classes|length }} enabled)
+                </p>
+                
+                <div class="select-all-controls">
+                    <button class="btn btn-primary" onclick="selectAllClasses()">Select All</button>
+                    <button class="btn btn-secondary" onclick="deselectAllClasses()">Deselect All</button>
+                    <button class="btn btn-success" onclick="selectCommonClasses()">Common Objects Only</button>
+                </div>
+                
+                <div class="classes-grid" id="classesGrid">
+                    {% for i in range(classes|length) %}
+                    <div class="class-item">
+                        <input type="checkbox" id="class_{{ i }}" value="{{ i }}" 
+                               {% if i in config.enabled_classes %}checked{% endif %}>
+                        <label for="class_{{ i }}">{{ classes[i] }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            
+            <!-- Region of Interest -->
+            <div class="section">
+                <h2>🔲 Region of Interest (ROI)</h2>
+                
+                <div class="form-group">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <span>Enable ROI Filtering</span>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="roiEnabled" {% if config.roi_enabled %}checked{% endif %}>
+                            <span class="slider"></span>
+                        </label>
+                    </label>
+                    <p style="color: #7f8c8d; margin-top: 5px;">
+                        Only detect objects within the specified region
+                    </p>
+                </div>
+                
+                <div class="roi-controls" id="roiControls" style="{% if not config.roi_enabled %}opacity: 0.5; pointer-events: none;{% endif %}">
+                    <div class="form-group">
+                        <label>X Position</label>
+                        <input type="number" id="roiX" value="{{ config.roi_x }}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Y Position</label>
+                        <input type="number" id="roiY" value="{{ config.roi_y }}" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Width</label>
+                        <input type="number" id="roiWidth" value="{{ config.roi_width }}" min="1">
+                    </div>
+                    <div class="form-group">
+                        <label>Height</label>
+                        <input type="number" id="roiHeight" value="{{ config.roi_height }}" min="1">
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Action Buttons -->
+            <div class="button-group">
+                <button class="btn btn-primary" onclick="saveConfiguration()">💾 Save Configuration</button>
+                <button class="btn btn-secondary" onclick="resetConfiguration()">🔄 Reset to Defaults</button>
+                <button class="btn btn-success" onclick="testConfiguration()">✅ Test Connection</button>
+            </div>
+            
+            <div class="last-updated">
+                Last updated: <span id="lastUpdated">{{ config.last_updated or 'Never' }}</span>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Update slider values
+        document.getElementById('confidenceThreshold').addEventListener('input', function(e) {
+            document.getElementById('confidenceValue').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        
+        document.getElementById('nmsThreshold').addEventListener('input', function(e) {
+            document.getElementById('nmsValue').textContent = parseFloat(e.target.value).toFixed(2);
+        });
+        
+        // Toggle ROI controls
+        document.getElementById('roiEnabled').addEventListener('change', function(e) {
+            const roiControls = document.getElementById('roiControls');
+            if (e.target.checked) {
+                roiControls.style.opacity = '1';
+                roiControls.style.pointerEvents = 'auto';
+            } else {
+                roiControls.style.opacity = '0.5';
+                roiControls.style.pointerEvents = 'none';
+            }
+        });
+        
+        // Show status message
+        function showStatus(message, isSuccess) {
+            const statusDiv = document.getElementById('statusMessage');
+            statusDiv.textContent = message;
+            statusDiv.className = 'status-message ' + (isSuccess ? 'success' : 'error');
+            setTimeout(() => {
+                statusDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Get enabled classes
+        function getEnabledClasses() {
+            const enabled = [];
+            document.querySelectorAll('.class-item input[type="checkbox"]').forEach(checkbox => {
+                if (checkbox.checked) {
+                    enabled.push(parseInt(checkbox.value));
+                }
+            });
+            return enabled;
+        }
+        
+        // Save configuration
+        async function saveConfiguration() {
+            const config = {
+                confidence_threshold: parseFloat(document.getElementById('confidenceThreshold').value),
+                nms_threshold: parseFloat(document.getElementById('nmsThreshold').value),
+                enabled_classes: getEnabledClasses(),
+                roi_enabled: document.getElementById('roiEnabled').checked,
+                roi_x: parseInt(document.getElementById('roiX').value),
+                roi_y: parseInt(document.getElementById('roiY').value),
+                roi_width: parseInt(document.getElementById('roiWidth').value),
+                roi_height: parseInt(document.getElementById('roiHeight').value)
+            };
+            
+            try {
+                const response = await fetch('/api/config', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(config)
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    showStatus('✅ Configuration saved successfully!', true);
+                    document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+                } else {
+                    showStatus('❌ Error: ' + result.error, false);
+                }
+            } catch (error) {
+                showStatus('❌ Error saving configuration: ' + error.message, false);
+            }
+        }
+        
+        // Reset configuration
+        async function resetConfiguration() {
+            if (!confirm('Are you sure you want to reset all settings to defaults?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/config/reset', {
+                    method: 'POST'
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    location.reload();
+                } else {
+                    showStatus('❌ Error: ' + result.error, false);
+                }
+            } catch (error) {
+                showStatus('❌ Error resetting configuration: ' + error.message, false);
+            }
+        }
+        
+        // Test connection
+        async function testConfiguration() {
+            try {
+                const response = await fetch('/health');
+                const result = await response.json();
+                
+                if (result.status === 'healthy') {
+                    showStatus('✅ Server is healthy! Config file exists: ' + result.config_exists, true);
+                } else {
+                    showStatus('⚠️ Server status: ' + result.status, false);
+                }
+            } catch (error) {
+                showStatus('❌ Connection error: ' + error.message, false);
+            }
+        }
+        
+        // Select all classes
+        function selectAllClasses() {
+            document.querySelectorAll('.class-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = true;
+            });
+        }
+        
+        // Deselect all classes
+        function deselectAllClasses() {
+            document.querySelectorAll('.class-item input[type="checkbox"]').forEach(checkbox => {
+                checkbox.checked = false;
+            });
+        }
+        
+        // Select common classes only
+        function selectCommonClasses() {
+            // Common classes: person, car, dog, cat, etc.
+            const commonClassIds = [0, 2, 15, 16, 17, 39, 40, 41, 42, 43, 56, 57, 58, 59, 60];
+            deselectAllClasses();
+            commonClassIds.forEach(id => {
+                const checkbox = document.getElementById('class_' + id);
+                if (checkbox) {
+                    checkbox.checked = true;
+                }
+            });
+        }
+    </script>
+</body>
+</html>
